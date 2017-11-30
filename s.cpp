@@ -1,25 +1,30 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 
 void linearsort(vector<int>,int);
-void quicksort(vector<int>,int,int);
-int divide(vector<int>,int lo,int high);
+void quicksort(vector<int> &,int,int);
+int partition(vector<int> &,int,int);
 vector<int> readNumbers(string& amofnumbers, string& properties);
 void printNumbers(const vector<int>,const string amofnumbers, const string properties);
 void printSorted(vector<int>,int);
 void initarrs(int [],int []);
-void countSort(vector<intt>, int, int);
-void radixsort(vector<int> , int );
+void insertionSort(vector<int>,int);
+void compare();
+int findIndexMatch(int , int []);
+
 
 ifstream fin;
-int comparisons[3], interchanged[3];
-//Keeps track of which array comps and interchange are where
 const int LINEAR = 0;
 const int QUICK = 1;
-const int RADIX = 2;
+const int INSERTION = 2;
+const int NUMSORTS = 3;
+int comparisons[3], interchanged[3];
+
+//Keeps track of which array comps and interchange are where
 
 
 int main(){
@@ -31,43 +36,36 @@ int main(){
 		initarrs(comparisons,interchanged);
 		vector<int> nums = readNumbers(amofnumbers,properties);
 		printNumbers(nums,amofnumbers,properties);
+
+
 		cout<<"LINERAR SORT---------------------------------------------------------------------------------------------------------------------"<<endl; 
 		linearsort(nums,stoi(amofnumbers));
-		cout<<"The linearsort made "<<comparisons[LINEAR]<<"comparisons"<<" and "<<interchanged[LINEAR]<<"swaps"<<endl;
-		
+		cout<<"The linearsort made "<<comparisons[LINEAR]<<" comparisons "<<" and "<<interchanged[LINEAR]<<"swaps"<<endl<<endl;
 
-		radixsort(nums,stoi(amofnumbers))
-		cout<<"The radixsort made"<<comparisons[RADIX]<<"comparisons"<<"and "<<interchanged[RADIX]<<"swaps"<<endl;
-		printSorted(nums,stoi(amofnumbers));
+
+		cout<<"INSERTION SORT---------------------------------------------------------------------------------------------------------------------"<<endl; 
+		insertionSort(nums,stoi(amofnumbers));
+		cout<<"The insertionSort made"<<comparisons[INSERTION]<<" comparisons"<<" and "<<interchanged[INSERTION]<<"swaps"<<endl<<endl;
+
 
 
 
 		cout<<endl<<"QUICK SORT--------------------------------------------------------------------------------------------------------------"<<endl;
 		quicksort(nums,0,stoi(amofnumbers));
-		cout<<"The quicksort made "<<comparisons[QUICK]<<"comparisons"<<" and "<<interchanged[QUICK]<<"swaps"<<endl;
 		printSorted(nums,stoi(amofnumbers));
+		cout<<endl<<"The quicksort made "<<comparisons[QUICK]<<" comparisons "<<" and "<<interchanged[QUICK]<<"swaps"<<endl<<endl;
 		
-
+		compare();
 		cout<<endl<<endl<<endl;
 	}
-	//printNumbers(nums);
 
-
-	// linearsort(nums);
-	// for(int i =0;i<8;i++){
-	// 	cout<<nums[i]<<"    ";
-	// }
-	// cout<<endl;
-
-
-
-	//quicksort(nums,0,8);
 
 }
 void initarrs(int comparisons[],int interchanged[]){
 	for(int i = 0;i<3;i++){
 		comparisons[i] = 0;
 		interchanged[i] = 0;
+
 	}
 }
 
@@ -105,7 +103,7 @@ void printSorted(vector<int> nums,int amofnumbers){
 void linearsort(vector<int> nums,int amofnumbers){
 	int smallest,temp;
 
-	for(int i = 0;i<8;i++){
+	for(int i = 0;i<amofnumbers;i++){
 		smallest = i;
 		for(int j = i+1;j<amofnumbers;j++){
 			comparisons[LINEAR]++;
@@ -115,87 +113,121 @@ void linearsort(vector<int> nums,int amofnumbers){
 			}
 		}
 		
-		temp = nums[smallest];
-		nums[smallest] = nums[i];
-		nums[i] = temp;
+		swap(nums[smallest],nums[i]);
+
 	}
 	printSorted(nums,amofnumbers);
 	cout<<endl;
 }
 
-void quicksort(vector<int>nums,int start,int end){
 
-	if(start < end ){
-		int wall = divide(nums,start,end);
-		//Less than piv
-		quicksort(nums,start,wall-1);
-		//Greater than piv
-		quicksort(nums,wall+1,end);
-		
-	}
-}
-
-int divide(vector<int>nums,int lo,int high){
-	int pivot = nums[lo];
-	//cout<<"Pivot"<<nums[high];
-	int index = lo;
-	for(int i = lo;i<high;i++){
-		comparisons[QUICK]++;
-		if(nums[i] <= pivot){
-			interchanged[QUICK]++;
-			swap(nums[i],nums[index]);
-			index++;
-		}
-	}
-	swap(nums[index],nums[high]);
-	
-	return index;
-
-}
-
-
-
+int partition (vector<int> &arr, int low, int high)
+{
+    int pivot = arr[high];    // pivot
+    int i = (low - 1);  // Index of smaller element
  
-// A function to do counting sort of arr[] according to
-// the digit represented by exp.
-void countSort(vector<intt> v;, int n, int exp){
-    int output[n]; // output array
-    int i, count[10] = {0};
- 
-    // Store count of occurrences in count[]
-    for (i = 0; i < n; i++)
-        count[ (arr[i]/exp)%10 ]++;
- 
-    // Change count[i] so that count[i] now contains actual
-    //  position of this digit in output[]
-    for (i = 1; i < 10; i++)
-        count[i] += count[i - 1];
- 
-    // Build the output array
-    for (i = n - 1; i >= 0; i--)
+    for (int j = low; j <= high- 1; j++)
     {
-        output[count[ (arr[i]/exp)%10 ] - 1] = arr[i];
-        count[ (arr[i]/exp)%10 ]--;
+        // If current element is smaller than or
+        // equal to pivot
+        comparisons[QUICK]++;
+        if (arr[j] <= pivot)
+        {
+            i++;    // increment index of smaller element
+            interchanged[QUICK]++;
+            swap(arr[i], arr[j]);
+        }
     }
- 
-    // Copy the output array to arr[], so that arr[] now
-    // contains sorted numbers according to current digit
-    for (i = 0; i < n; i++)
-        arr[i] = output[i];
+    swap(arr[i + 1], arr[high]);
+    return (i + 1);
 }
  
-// The main function to that sorts arr[] of size n using 
-// Radix Sort
-void radixsort(vector<int> arr, int n){
-    // Find the maximum number to know number of digits
-    int m = getMax(arr, n);
+/* The main function that implements QuickSort
+ arr[] --> Array to be sorted,
+  low  --> Starting index,
+  high  --> Ending index */
+void quicksort(vector<int> &arr, int low, int high)
+{
+    if (low < high)
+    {
+        /* pi is partitioning index, arr[p] is now
+           at right place */
+        int pi = partition(arr, low, high);
  
-    // Do counting sort for every digit. Note that instead
-    // of passing digit number, exp is passed. exp is 10^i
-    // where i is current digit number
-    for (int exp = 1; m/exp > 0; exp *= 10)
-        countSort(arr, n, exp);
+        // Separately sort elements before
+        // partition and after partition
+        quicksort(arr, low, pi - 1);
+        quicksort(arr, pi + 1, high);
+    }
 }
+
+
+void insertionSort(vector<int>nums,int amofnumbers){
+	int j = 0;
+	for(int i = 1;i<amofnumbers;i++){
+		j=i;
+		while(j != 0){
+			comparisons[INSERTION]++;
+			if(nums[j] < nums[j-1]){
+				interchanged[INSERTION]++;
+				swap(nums[j],nums[j-1]);
+			}
+
+			j--;	
+		}
+
+	}
+	printSorted(nums,amofnumbers);
+	cout<<endl;
+
+}
+
+void compare(){
+	//Find smallest next smallest...
+
+	int smallest, index_for_string = 0;
+	vector<int> copy (comparisons, comparisons+sizeof(comparisons)/sizeof(comparisons[0]));
+	vector<int> copyinter (interchanged, interchanged+sizeof(interchanged)/sizeof(interchanged[0]));
+
+	string sort_names[] = {"Linear","Quick","Insertion"};
+
+
+	//sort values 
+	sort(copy.begin(),copy.end());
+	sort(copyinter.begin(),copyinter.end());
+
+
+	//Pick from the start of the vector and print the name of sort 
+	index_for_string = findIndexMatch(copy[0],comparisons);
+	cout<<"Smallest amount of comparisons: "<<sort_names[index_for_string]<<endl;
+
+	index_for_string = findIndexMatch(copy[1],comparisons);
+	cout<<"Middle amount of comparisons:: "<<sort_names[index_for_string]<<endl;
+
+	index_for_string = findIndexMatch(copy[2],comparisons);
+	cout<<"Largest amount of comparisons:: "<<sort_names[index_for_string]<<endl; 
+
+
+	//Pick from the start of the vector and print the name of sort 
+	index_for_string = findIndexMatch(copyinter[0],interchanged);
+	cout<<"Smallest amount of swapped: "<<sort_names[index_for_string]<<endl;
+
+	index_for_string = findIndexMatch(copyinter[1],interchanged);
+	cout<<"Middle amount of swapped: "<<sort_names[index_for_string]<<endl;
+
+	index_for_string = findIndexMatch(copyinter[2],interchanged);
+	cout<<"Largest amount swapped: "<<sort_names[index_for_string]<<endl; 
+}
+
+
+//Find index for the value
+int findIndexMatch(int value_to_be_found, int comparisons[]){
+	for(int i = 0;i<3;i++)
+		if(comparisons[i] == value_to_be_found) return i;
+
+}
+
+
 
 
 
